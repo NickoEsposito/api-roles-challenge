@@ -6,11 +6,15 @@
     "description": "API documentation for managing Roles and User Assignments."
   },
   "servers": [
-    {
-      "url": "http://localhost:3000",
-      "description": "Local server"
-    }
-  ],
+  {
+    "url": "https://tu-api-challenge.onrender.com",
+    "description": "Servidor de Producción en Render"
+  },
+  {
+    "url": "http://localhost:3000",
+    "description": "Servidor Local"
+  }
+],
   "components": {
     "securitySchemes": {
       "bearerAuth": {
