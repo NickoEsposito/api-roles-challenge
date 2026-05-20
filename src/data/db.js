@@ -13,11 +13,13 @@ let nextRoleId = 4;
 
 module.exports = {
   // === Auth & User Queries ===
+  
   getUserByToken: (token) => users.find(u => u.token === token),
   getUsers: () => users,
   getUserById: (id) => users.find(u => u.id === id),
 
   // === Roles CRUD ===
+
   getRoles: () => roles,
   getRoleById: (id) => roles.find(r => r.id === id),
   getRoleByName: (name) => roles.find(r => r.name === name),
@@ -38,7 +40,7 @@ module.exports = {
   updateRole: (id, updateData) => {
     const index = roles.findIndex(r => r.id === id);
     if (index === -1) return null;
-    roles[index] = { ...roles[index], ...updateData, id }; // Force keeping same ID
+    roles[index] = { ...roles[index], ...updateData, id }; 
     return roles[index];
   },
 
@@ -46,13 +48,12 @@ module.exports = {
     const index = roles.findIndex(r => r.id === id);
     if (index === -1) return false;
     roles.splice(index, 1);
-    
-    // Cascada: si eliminamos un rol, se lo quitamos a los usuarios que lo tenían
     users = users.map(u => u.roleId === id ? { ...u, roleId: null } : u);
     return true;
   },
 
   // === Assignments ===
+
   assignRoleToUser: (userId, roleId) => {
     const user = users.find(u => u.id === userId);
     const roleExists = roles.find(r => r.id === roleId);

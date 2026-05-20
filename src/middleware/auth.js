@@ -8,13 +8,13 @@ const authenticateToken = (req, res, next) => {
   }
 
   const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
-  const user = db.getUserByToken(token);
-
-  if (!user) {
+  
+  if (token !== process.env.TOKEN_AUTH) {
     return res.status(401).json({ message: 'Invalid token' });
   }
 
-  req.user = user;
+
+  req.user = { id: 1, roleId: 1 }; 
   next();
 };
 
