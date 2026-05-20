@@ -36,8 +36,6 @@ Una API RESTful construida con Node.js y Express para la gestión de roles y la 
 
 ## Variables de Entorno
 
-El proyecto utiliza variables de entorno para su configuración. Crear un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
-
 ```env
 PORT=3000
 TOKEN_AUTH=secret-token-123

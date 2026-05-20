@@ -22,7 +22,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // ==========================================
 
 app.get('/', (req, res) => {
-    res.json({ message: "API de Roles y Usuarios funcionando. Ve a /docs para ver la documentación." });
+    res.json({ message: "Bienvenidos a la API Test de Roles y Usuarios para Obel. Andá a /docs para ver los metodos disponibles mediante swagger." });
 });
 
 app.get('/api/roles', authenticateToken, roleController.getAllRoles);
