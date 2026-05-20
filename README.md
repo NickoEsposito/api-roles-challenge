@@ -1,12 +1,17 @@
 # API Roles & User Assignments Challenge
 
-Una API RESTful construida con Node.js y Express para la gestión de roles y la asignación de los mismos a usuarios. Este proyecto utiliza persistencia en memoria y sigue los principios de Clean Code, implementando un diseño basado en capas (Controladores, Servicios/Data, Middleware).
+Una API RESTful construida con Node.js y Express para la gestión de roles y la asignación de los mismos a usuarios. Este proyecto utiliza persistencia en memoria y sigue los principios de Clean Code, implementando un diseño basado en capas (Controladores, Servicios, Data, Middleware).
+
+## Enlaces
+
+- **API en Producción:** [https://api-roles-challenge.onrender.com](https://api-roles-challenge.onrender.com)
+- **Documentación de la API (Swagger en Producción):** [https://api-roles-challenge.onrender.com/docs](https://api-roles-challenge.onrender.com/docs)
 
 ## Características
 - **CRUD de Roles**: Crea, lee, actualiza y elimina roles.
 - **Asignación de Roles**: Asigna y remueve roles de usuarios.
 - **Validaciones y Manejo de Errores**: Middleware centralizado para respuestas consistentes en caso de error (400, 401, 404, 500).
-- **Autenticación Simulada**: Middleware de validación a través del header `Authorization`.
+- **Autenticación Basada en Token**: Middleware de validación a través del header `Authorization` (Bearer token) y variables de entorno.
 - **Documentación Swagger**: Documentación interactiva de la API accesible vía UI.
 - **Testing**: Pruebas automatizadas con Jest y Supertest.
 
@@ -15,6 +20,7 @@ Una API RESTful construida con Node.js y Express para la gestión de roles y la 
 - Express.js
 - Swagger UI Express (OpenAPI 3.0)
 - Jest & Supertest (Testing)
+- Dotenv (Variables de entorno)
 
 ## Prerrequisitos
 - Node.js (v14 o superior recomendado)
@@ -28,7 +34,16 @@ Una API RESTful construida con Node.js y Express para la gestión de roles y la 
    npm install
    ```
 
-## Ejecución
+## Variables de Entorno
+
+El proyecto utiliza variables de entorno para su configuración. Crear un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
+
+```env
+PORT=3000
+TOKEN_AUTH=secret-token-123
+```
+
+## Ejecución y Uso
 
 - **Modo Desarrollo** (con recarga automática mediante Nodemon):
   ```bash
@@ -38,14 +53,6 @@ Una API RESTful construida con Node.js y Express para la gestión de roles y la 
   ```bash
   npm start
   ```
-
-Por defecto, la API se levantará en `http://localhost:3000`.
-
-## Documentación de la API (Swagger)
-
-Una vez que la aplicación esté corriendo, puedes acceder a la documentación interactiva de Swagger en la siguiente ruta:
-
-👉 **[http://localhost:3000/docs](http://localhost:3000/docs)**
 
 ## Tests
 
@@ -57,34 +64,29 @@ npm test
 
 ## Estructura del Proyecto
 
-```text
-src/
-├── app.js                 # Punto de entrada de la aplicación y configuración de Express
-├── data/
-│   └── db.js              # Capa de datos (Persistencia en memoria)
-├── middleware/
-│   ├── auth.js            # Middleware de validación del token de autorización
-│   ├── errorHandler.js    # Middleware centralizado para el manejo de excepciones
-│   └── validator.js       # Validaciones de los controladores
-└── utils/
-    └── AppError.js        # Clase personalizada para manejar errores operativos
-tests/
-└── app.test.js            # Suite principal de pruebas
-swagger.json               # Especificación OpenAPI 3.0
+api-roles-challenge/
+├── .env                   # Variables de entorno (no versionado)
+├── package.json           # Dependencias y scripts
+├── README.md              # Documentación del proyecto
+├── src/
+│   ├── app.js             # Punto de entrada de la aplicación y configuración
+│   ├── swagger.json       # Especificación OpenAPI 3.0
+│   ├── controllers/
+│   │   └── roleController.js # Lógica de control de las peticiones
+│   ├── data/
+│   │   └── db.js          # Capa de datos (Persistencia en memoria)
+│   ├── middleware/
+│   │   ├── auth.js        # Middleware de validación del token de autorización
+│   │   ├── errorHandler.js# Middleware centralizado para manejo de excepciones
+│   │   └── validator.js   # Validaciones de request (body, params)
+│   ├── services/
+│   │   └── roleService.js # Reglas de negocio y lógica de aplicación
+│   └── utils/
+│       └── AppError.js    # Clase personalizada para errores operativos
+└── tests/
+    ├── app.test.js        # Pruebas de integración
+    └── roleService.test.js# Pruebas unitarias de los servicios
 ```
 
-## Guía de Despliegue (Deploy)
 
-Esta aplicación está lista para ser desplegada en plataformas PaaS como **Render**, **Railway**, o **Heroku**. 
-
-**Pasos generales para un despliegue:**
-1. Sube este código a un repositorio en GitHub.
-2. Crea un nuevo **Web Service** en la plataforma elegida y conéctalo a tu repositorio de GitHub.
-3. Configuración del entorno:
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-4. **Variables de Entorno**: 
-   - La aplicación detectará automáticamente `process.env.PORT`, que es inyectado por defecto por plataformas como Render o Railway.
-   - De ser necesario, agrega variables adicionales.
-
-> **Nota:** La aplicación utiliza almacenamiento "en memoria" mediante arreglos simples (`src/data/db.js`). Cada vez que la plataforma PaaS reinicie el servicio (o tras un nuevo deploy), los datos volverán a su estado original (vacío). Para llevar esto a un nivel productivo real, debes reemplazar los métodos de `db.js` por consultas a una base de datos real (ej. PostgreSQL, MongoDB, MySQL).
+> **Nota:** La aplicación utiliza almacenamiento "en memoria" mediante arreglos simples (`src/data/db.js`). Cada vez que la plataforma PaaS reinicie el servicio, los datos volverán a su estado original. .
