@@ -1,0 +1,304 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Roles & User Assignments",
+    "version": "1.0.0",
+    "description": "API documentation for managing Roles and User Assignments."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your token here. Example: 'token-admin-123'"
+      }
+    },
+    "schemas": {
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "admin"
+          },
+          "description": {
+            "type": "string",
+            "example": "Administrator with full access"
+          },
+          "type": {
+            "type": "string",
+            "example": "system"
+          },
+          "scope": {
+            "type": "string",
+            "example": "global"
+          }
+        },
+        "required": ["name"]
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "example": 2
+          },
+          "roleId": {
+            "type": "integer",
+            "example": 1
+          }
+        },
+        "required": ["userId", "roleId"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "integer",
+                "example": 404
+              },
+              "message": {
+                "type": "string",
+                "example": "Resource not found"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/roles": {
+      "get": {
+        "tags": ["Roles"],
+        "summary": "List all roles",
+        "description": "Returns an array of all available roles.",
+        "responses": {
+          "200": {
+            "description": "A list of roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Role" }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Roles"],
+        "summary": "Create a new role",
+        "description": "Creates a new role. Requires admin privileges.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "editor" },
+                  "description": { "type": "string", "example": "Can edit content" },
+                  "type": { "type": "string", "example": "custom" },
+                  "scope": { "type": "string", "example": "content" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role successfully created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Role" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing required fields or validation failed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden - Insufficient privileges" }
+        }
+      }
+    },
+    "/api/roles/{id}": {
+      "get": {
+        "tags": ["Roles"],
+        "summary": "Get a role by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The ID (or name) of the role"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Role" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": {
+            "description": "Role not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Roles"],
+        "summary": "Update an existing role",
+        "description": "Updates a role's information. Requires admin privileges.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": { "type": "string", "example": "Updated description" },
+                  "type": { "type": "string", "example": "system" },
+                  "scope": { "type": "string", "example": "global" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role successfully updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Role" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden - Insufficient privileges" },
+          "404": { "description": "Role not found" }
+        }
+      }
+    },
+    "/api/users/{userId}/roles": {
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Assign a role to a user",
+        "description": "Assigns a specific role to a user. Requires admin privileges.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roleId": { "type": "string", "example": "admin" }
+                },
+                "required": ["roleId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role successfully assigned to user"
+          },
+          "400": { "description": "Bad Request - Missing roleId" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden - Insufficient privileges" },
+          "404": { "description": "User or Role not found" }
+        }
+      }
+    },
+    "/api/users/{userId}/roles/{roleId}": {
+      "delete": {
+        "tags": ["Assignments"],
+        "summary": "Remove a role assignment from a user",
+        "description": "Removes a specific role from a user. Requires admin privileges.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "in": "path",
+            "name": "roleId",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The ID (or name) of the role to remove"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role successfully removed from user"
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden - Insufficient privileges" },
+          "404": { "description": "User or Assignment not found" }
+        }
+      }
+    }
+  }
+}

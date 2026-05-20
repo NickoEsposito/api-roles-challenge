@@ -1,0 +1,311 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Roles & User Assignments",
+    "description": "API RESTful para la gestión de roles y asignación a usuarios.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor Local"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Introduce el token de autenticación (Ejemplo: admin-token o user-token)"
+      }
+    },
+    "schemas": {
+      "Role": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "admin"
+          },
+          "description": {
+            "type": "string",
+            "example": "Administrador del sistema"
+          },
+          "type": {
+            "type": "string",
+            "example": "system"
+          },
+          "scope": {
+            "type": "string",
+            "example": "global"
+          }
+        }
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "example": 1
+          },
+          "roleId": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string",
+            "example": "Role not found"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/roles": {
+      "get": {
+        "summary": "Listar roles",
+        "description": "Obtiene la lista completa de roles del sistema.",
+        "tags": ["Roles"],
+        "responses": {
+          "200": {
+            "description": "Lista de roles devuelta con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Role"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (Token faltante o inválido)"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un rol",
+        "description": "Crea un nuevo rol en el sistema.",
+        "tags": ["Roles"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "manager" },
+                  "description": { "type": "string", "example": "Gerente de área" },
+                  "type": { "type": "string", "example": "custom" },
+                  "scope": { "type": "string", "example": "local" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rol creado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Role" }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud incorrecta (Faltan datos o el rol ya existe)"
+          },
+          "401": {
+            "description": "No autorizado"
+          },
+          "403": {
+            "description": "Prohibido (Requiere privilegios de administrador)"
+          }
+        }
+      }
+    },
+    "/api/roles/{id}": {
+      "get": {
+        "summary": "Obtener rol por ID",
+        "description": "Devuelve los detalles de un rol específico por su ID o nombre.",
+        "tags": ["Roles"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID o Nombre del rol",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles del rol",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Role" }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" },
+          "404": { "description": "Rol no encontrado" }
+        }
+      },
+      "put": {
+        "summary": "Editar un rol",
+        "description": "Actualiza la información (description, type, scope) de un rol existente.",
+        "tags": ["Roles"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID o Nombre del rol a editar",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": { "type": "string", "example": "Nueva descripción" },
+                  "type": { "type": "string", "example": "system" },
+                  "scope": { "type": "string", "example": "global" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rol actualizado con éxito",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Role" }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" },
+          "404": { "description": "Rol no encontrado" }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar un rol",
+        "description": "Elimina un rol del sistema.",
+        "tags": ["Roles"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID o Nombre del rol a eliminar",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Rol eliminado con éxito" },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" },
+          "404": { "description": "Rol no encontrado" }
+        }
+      }
+    },
+    "/api/users/{userId}/roles": {
+      "post": {
+        "summary": "Asignar un rol a un usuario",
+        "description": "Asigna un rol específico a un usuario mediante el ID del rol o su nombre.",
+        "tags": ["Assignments"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "ID del usuario",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["roleId"],
+                "properties": {
+                  "roleId": {
+                    "type": "integer",
+                    "description": "ID del rol (también se soporta el nombre del rol)",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Rol asignado correctamente al usuario" },
+          "400": { "description": "Datos de solicitud inválidos" },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" },
+          "404": { "description": "Usuario o rol no encontrado" }
+        }
+      }
+    },
+    "/api/users/{userId}/roles/{roleId}": {
+      "delete": {
+        "summary": "Eliminar asignación",
+        "description": "Remueve un rol asignado a un usuario.",
+        "tags": ["Assignments"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "ID del usuario",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "description": "ID o nombre del rol a remover",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Rol removido del usuario correctamente" },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" },
+          "404": { "description": "Usuario, rol o asignación no encontrada" }
+        }
+      }
+    }
+  }
+}
