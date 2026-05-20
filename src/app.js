@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('../swagger.json');
+const swaggerDocument = require('./swagger.json');
 const { authenticateToken, authorizeRole } = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 const { validateRole } = require('./middleware/validator');
